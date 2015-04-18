@@ -26,9 +26,11 @@ struct EightyEightyState {
     var l: UInt8 = 0
     var sp: UInt16 = 0
     var pc: UInt16 = 0
+    var memory: Array<UInt8> = []
 }
 
 class EightyEightyCPU: NSObject {
+    let instructionLengths: Array<Int>
     var conditionCodes: EightyEightyConditionCodes
     var state: EightyEightyState
     var data: UnsafeBufferPointer<UInt8>?
@@ -36,6 +38,25 @@ class EightyEightyCPU: NSObject {
     override init() {
         self.conditionCodes = EightyEightyConditionCodes()
         self.state = EightyEightyState()
+        
+        self.instructionLengths = [
+            1, 3, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+            1, 3, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+            1, 3, 3, 1, 1, 1, 2, 1, 1, 1, 3, 1, 1, 1, 2, 1,
+            1, 3, 3, 1, 1, 1, 2, 1, 1, 1, 3, 1, 1, 1, 2, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 3, 3, 3, 1, 2, 1, 1, 1, 3, 3, 3, 3, 2, 1,
+            1, 1, 3, 2, 3, 1, 2, 1, 1, 1, 3, 2, 3, 3, 2, 1,
+            1, 1, 3, 1, 3, 1, 2, 1, 1, 1, 3, 1, 3, 3, 2, 1,
+            1, 1, 3, 1, 3, 1, 2, 1, 1, 1, 3, 1, 3, 3, 2, 1
+        ]
     }
     
     func emulate(filePath: String) {
@@ -47,11 +68,11 @@ class EightyEightyCPU: NSObject {
         // while self.state.pc < 10 {
         while executionLength < 30 {
             let byte = bytes[Int(self.state.pc)]
-            var length = 1
+            var length = self.instructionLengths[Int(self.state.pc)]
             
             switch byte {
-            case 0x00, 0x10, 0x20, 0x30:
-                length = nop(byte)
+            case 0x00, 0x10, 0x20, 0x30, 0x08, 0x18, 0x28, 0x38:
+                nop(byte)
             case 0x04:
                 self.state.b += 1
                 logicFlagsZSP(self.state.b)
@@ -59,17 +80,19 @@ class EightyEightyCPU: NSObject {
                 self.state.b -= 1
                 logicFlagsZSP(self.state.b)
             case 0x06:
-                length = mviBd8(byte)
+                mviBd8(byte)
             // case 0x13:
             // length = inxD(byte)
             case 0x21:
-                length = lxi(byte)
+                lxi(byte)
             case 0xc3:
-                length = jmp(byte)
+                jmp(byte)
             case 0xcd:
-                length = calla16(byte)
+                calla16(byte)
+            case 0xd4:
+                cnc(byte)
             default:
-                length = unimplementedInstruction(byte)
+                unimplementedInstruction(byte)
             }
             
             self.state.pc = self.state.pc + UInt16(length)
@@ -102,51 +125,39 @@ class EightyEightyCPU: NSObject {
     
     // MARK: - Instructions
     
-    func nop(opcode: UInt8) -> Int {
+    func nop(opcode: UInt8) {
         println(NSString(format: "NOP: %02hhx", opcode))
-        return 1
     }
     
-    func decrB(opcode: UInt8) -> Int {
+    func decrB(opcode: UInt8) {
         // s.d, s.e = hilo(adr(s.d, s.e) + 1)
-        
-        return 1;
     }
     
-    func inxD(opcode: UInt8) -> Int {
+    func inxD(opcode: UInt8) {
         // s.d, s.e = hilo(adr(s.d, s.e) + 1)
-        
-        return 1;
     }
     
-    func lxi(opcode: UInt8) -> Int {
+    func lxi(opcode: UInt8) {
         println(NSString(format: "LXI H, d16: %02hhx", opcode))
         
         self.state.h = byte(2)
         self.state.l = byte(1)
-        
-        return 3
     }
     
-    func mviBd8(opcode: UInt8) -> Int {
+    func mviBd8(opcode: UInt8) {
         println(NSString(format: "MVI B, d8: %02hhx", opcode))
         self.state.b = byte(1)
-        
-        return 2
     }
     
-    func jmp(opcode: UInt8) -> Int {
+    func jmp(opcode: UInt8) {
         let address = memoryAddress(byte(1), lo: byte(2))
         self.state.pc = address
         
         println(NSString(format: "JUMPING: %04lx", address))
-        
-        return 3
     }
     
-    func unimplementedInstruction(opcode: UInt8) -> Int {
+    func unimplementedInstruction(opcode: UInt8) {
         println(NSString(format: "Unimplemented instruction: %02hhx", opcode))
-        return 1
     }
     
     // MARK: - Calling
@@ -155,11 +166,16 @@ class EightyEightyCPU: NSObject {
         println("CALL: UNIMPLEMENTED")
     }
     
-    func calla16(opcode: UInt8) -> Int {
+    func cnc(opcode: UInt8) {
+        if !self.conditionCodes.cy {
+            let address = memoryAddress(byte(1), lo: byte(2))
+            call(address)
+        }
+    }
+    
+    func calla16(opcode: UInt8) {
         let address = memoryAddress(byte(1), lo: byte(2))
         call(address)
-        
-        return 3
     }
     
     // MARK: - Arithmetic
