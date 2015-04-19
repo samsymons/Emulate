@@ -85,6 +85,62 @@ class EightyEightyCPU: NSObject {
             // length = inxD(byte)
             case 0x21:
                 lxi(byte)
+            case 0x40:
+                self.state.b = self.state.b
+            case 0x41:
+                self.state.b = self.state.c
+            case 0x42:
+                self.state.b = self.state.d
+            case 0x43:
+                self.state.b = self.state.e
+            case 0x44:
+                self.state.b = self.state.h
+            case 0x45:
+                self.state.b = self.state.l
+            case 0x47:
+                self.state.b = self.state.a
+            case 0x48:
+                self.state.c = self.state.b
+            case 0x49:
+                self.state.c = self.state.c
+            case 0x4a:
+                self.state.c = self.state.d
+            case 0x4b:
+                self.state.c = self.state.e
+            case 0x4c:
+                self.state.c = self.state.h
+            case 0x4d:
+                self.state.c = self.state.l
+            case 0x4f:
+                self.state.c = self.state.a
+            case 0x50:
+                self.state.d = self.state.b
+            case 0x51:
+                self.state.d = self.state.c
+            case 0x52:
+                self.state.d = self.state.d
+            case 0x53:
+                self.state.d = self.state.e
+            case 0x54:
+                self.state.d = self.state.h
+            case 0x55:
+                self.state.d = self.state.l
+            case 0x57:
+                self.state.d = self.state.a
+            case 0x58:
+                self.state.e = self.state.b
+            case 0x59:
+                self.state.e = self.state.c
+            case 0x5a:
+                self.state.e = self.state.d
+            case 0x5b:
+                self.state.e = self.state.e
+            case 0x5c:
+                self.state.e = self.state.h
+            case 0x5e:
+                self.state.e = self.state.l
+            case 0x5f:
+                self.state.e = self.state.a
             case 0xc3:
                 jmp(byte)
             case 0xcd:
