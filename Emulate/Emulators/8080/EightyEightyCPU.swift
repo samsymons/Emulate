@@ -13,7 +13,7 @@ struct EightyEightyConditionCodes {
     var s: Bool = false // Sign flag, set when the MSB is 1
     var p: Bool = false // Parity flag
     var cy: Bool = false // Carry flag
-    var ac: Bool = false // Auxillary carry
+    var ac: Bool = false // Auxiliary carry
 }
 
 struct EightyEightyState {
