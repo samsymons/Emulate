@@ -65,8 +65,8 @@ class EightyEightyCPU: NSObject {
         
         var executionLength = 0
         
-        // while self.state.pc < 10 {
-        while executionLength < 30 {
+        // while executionLength < 30 {
+        while self.state.pc < 10 {
             let byte = bytes[Int(self.state.pc)]
             var length = self.instructionLengths[Int(self.state.pc)]
             
@@ -141,12 +141,24 @@ class EightyEightyCPU: NSObject {
                 self.state.e = self.state.l
             case 0x5f:
                 self.state.e = self.state.a
+            case 0xc1:
+                self.state.c = self.state.memory.removeLast()
+                self.state.b = self.state.memory.removeLast()
+                self.state.sp -= 2
             case 0xc3:
                 jmp(byte)
+            case 0xc5:
+                self.state.memory.append(self.state.b)
+                self.state.memory.append(self.state.c)
+                self.state.sp += 2
             case 0xcd:
                 calla16(byte)
             case 0xd4:
                 cnc(byte)
+            case 0xe5:
+                self.state.memory.append(self.state.l)
+                self.state.memory.append(self.state.h)
+                self.state.sp += 2
             default:
                 unimplementedInstruction(byte)
             }
