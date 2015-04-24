@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>ADBECB2C-2A66-41D5-891C-C863826D991C</string>
 	<key>IDESourceControlProjectName</key>
-	<string>project</string>
+	<string>Emulate</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>B4A87A7481F4CB0DB0EC66F958B79E0D6A3E373B</key>
 		<string>github.com:samsymons/Emulate.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>Emulate.xcodeproj/project.xcworkspace</string>
+	<string>Emulate.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>B4A87A7481F4CB0DB0EC66F958B79E0D6A3E373B</key>
