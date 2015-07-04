@@ -1,3 +1,3 @@
 # Emulate
 
-An unfinished 8080 emulator, written in Swift.
+An unfinished NES emulator, written in Swift.
